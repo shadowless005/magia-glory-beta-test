@@ -1,272 +1,250 @@
+import random
+
+
+# Base Character class
 class Character:
     def __init__(self, name, health, attack_power):
         self.name = name
         self.health = health
         self.attack_power = attack_power
         self.max_health = health
-        self.secret_ability_used = False
+        self.block_next_attack = False
 
     def attack(self, opponent):
-        opponent.health -= self.attack_power
-        print(f"{self.name} attacks {opponent.name} for {self.attack_power} damage!")
-        if opponent.health <= 0:
-            print(f"{opponent.name} has been defeated!")
+        damage = random.randint(self.attack_power - 5, self.attack_power + 5)
+        print(f"{self.name} attacks!")
+        opponent.take_damage(damage)
+
+    def take_damage(self, damage):
+        if self.block_next_attack:
+            print(f"{self.name} blocks or evades the attack!")
+            self.block_next_attack = False
+            return
+
+        self.health = max(0, self.health - damage)
+        print(f"{self.name} takes {damage} damage!")
+
+    def heal(self):
+        amount = min(25, self.max_health - self.health)
+        self.health += amount
+        print(f"{self.name} heals {amount} HP!")
 
     def display_stats(self):
-        print(f"{self.name} - HP: {self.health}/{self.max_health}, ATK: {self.attack_power}")
+        print(
+            f"{self.name}'s Stats - "
+            f"Health: {self.health}/{self.max_health}, "
+            f"Attack Power: {self.attack_power}"
+        )
 
 
-# ------------------ WARRIOR ------------------
+# Warrior class
 class Warrior(Character):
     def __init__(self, name):
-        super().__init__(name, 140, 25)
+        super().__init__(name, health=140, attack_power=25)
 
     def special_ability(self, opponent):
-        damage = self.attack_power * 2
-        opponent.health -= damage
-        print(f"{self.name} uses Power Strike for {damage} damage!")
+        print("1. Power Strike")
+        print("2. Shield Block")
+        choice = input("Choose an ability: ")
 
-    def shield_block(self):
-        self.health += 10
-        print(f"{self.name} uses Shield Block (+10 HP)")
+        if choice == "1":
+            print(f"{self.name} uses Power Strike!")
+            opponent.take_damage(self.attack_power * 2)
+        elif choice == "2":
+            print(f"{self.name} uses Shield Block!")
+            self.block_next_attack = True
+        else:
+            print("Invalid ability.")
+            return False
 
-    def secret_ability(self, opponent):
-        if self.health > 20:
-            print("Last Stand not unlocked yet!")
-            return
-        if self.secret_ability_used:
-            print("Last Stand already used!")
-            return
-
-        damage = self.attack_power * 3
-        opponent.health -= damage
-        self.secret_ability_used = True
-
-        print(f"{self.name} uses LAST STAND for {damage} damage!")
+        return True
 
 
-# ------------------ MAGE ------------------
+# Mage class
 class Mage(Character):
     def __init__(self, name):
-        super().__init__(name, 100, 35)
+        super().__init__(name, health=100, attack_power=35)
 
     def special_ability(self, opponent):
-        damage = 50
-        opponent.health -= damage
-        print(f"{self.name} casts Fireball for {damage} damage!")
+        print("1. Fireball")
+        print("2. Arcane Recovery")
+        choice = input("Choose an ability: ")
 
-    def ice_shield(self):
-        self.health += 15
-        print(f"{self.name} uses Ice Shield (+15 HP)")
+        if choice == "1":
+            print(f"{self.name} casts Fireball!")
+            opponent.take_damage(50)
+        elif choice == "2":
+            amount = min(40, self.max_health - self.health)
+            self.health += amount
+            print(f"{self.name} uses Arcane Recovery and heals {amount} HP!")
+        else:
+            print("Invalid ability.")
+            return False
 
-    def secret_ability(self, opponent):
-        if self.health > 30:
-            print("Arcane Blast not unlocked yet!")
-            return
-        if self.secret_ability_used:
-            print("Arcane Blast already used!")
-            return
-
-        damage = 100
-        opponent.health -= damage
-        self.secret_ability_used = True
-
-        print(f"{self.name} uses ARCANE BLAST for {damage} damage!")
+        return True
 
 
-# ------------------ EVIL WIZARD ------------------
-class EvilWizard(Character):
-    def __init__(self, name):
-        super().__init__(name, 200, 15)
-
-    def special_ability(self, opponent):
-        damage = 90
-        opponent.health -= damage
-        print(f"{self.name} uses Oblivion for {damage} damage!")
-
-    def regenerate(self):
-        self.health += 5
-        print(f"{self.name} regenerates 5 HP")
-
-    def secret_ability(self, opponent):
-        if self.health > 50:
-            print("Dark Portal not unlocked yet!")
-            return
-        if self.secret_ability_used:
-            print("Dark Portal already used!")
-            return
-
-        damage = 120
-        opponent.health -= damage
-        self.secret_ability_used = True
-
-        print(f"{self.name} opens DARK PORTAL for {damage} damage!")
-
-
-# ------------------ ARCHER ------------------
+# Archer class
 class Archer(Character):
     def __init__(self, name):
-        super().__init__(name, 120, 20)
+        super().__init__(name, health=120, attack_power=20)
 
     def special_ability(self, opponent):
-        damage = 40
-        opponent.health -= damage
-        print(f"{self.name} uses Precision Shot for {damage} damage!")
+        print("1. Quick Shot")
+        print("2. Evade")
+        choice = input("Choose an ability: ")
 
-    def evade(self):
-        self.health += 10
-        print(f"{self.name} evades (+10 HP)")
+        if choice == "1":
+            print(f"{self.name} uses Quick Shot!")
+            self.attack(opponent)
 
-    def secret_ability(self, opponent):
-        if self.health > 40:
-            print("Rapid Fire not unlocked yet!")
-            return
-        if self.secret_ability_used:
-            print("Rapid Fire already used!")
-            return
+            if opponent.health > 0:
+                self.attack(opponent)
+        elif choice == "2":
+            print(f"{self.name} prepares to evade!")
+            self.block_next_attack = True
+        else:
+            print("Invalid ability.")
+            return False
 
-        damage = 80
-        opponent.health -= damage
-        self.secret_ability_used = True
-
-        print(f"{self.name} uses RAPID FIRE for {damage} damage!")
+        return True
 
 
-# ------------------ PALADIN ------------------
+# Paladin class
 class Paladin(Character):
     def __init__(self, name):
-        super().__init__(name, 160, 30)
+        super().__init__(name, health=160, attack_power=30)
 
     def special_ability(self, opponent):
-        damage = 60
-        opponent.health -= damage
-        print(f"{self.name} uses Holy Light for {damage} damage!")
+        print("1. Holy Strike")
+        print("2. Divine Shield")
+        choice = input("Choose an ability: ")
 
-    def divine_shield(self):
-        self.health += 20
-        print(f"{self.name} uses Divine Shield (+20 HP)")
+        if choice == "1":
+            print(f"{self.name} uses Holy Strike!")
+            opponent.take_damage(self.attack_power + 20)
+        elif choice == "2":
+            print(f"{self.name} uses Divine Shield!")
+            self.block_next_attack = True
+        else:
+            print("Invalid ability.")
+            return False
 
-    def secret_ability(self, opponent):
-        if self.health > 30:
-            print("Disintegrate not unlocked yet!")
-            return
-        if self.secret_ability_used:
-            print("Disintegrate already used!")
-            return
-
-        damage = 100
-        opponent.health -= damage
-        self.secret_ability_used = True
-
-        print(f"{self.name} uses DISINTEGRATE for {damage} damage!")
+        return True
 
 
-# ------------------ CHOSEN ONE ------------------
-class Chosen_one(Character):
+# Evil Wizard class
+class EvilWizard(Character):
     def __init__(self, name):
-        super().__init__(name, 200, 40)
+        super().__init__(name, health=150, attack_power=15)
 
-    def special_ability(self, opponent):
-        damage = 80
-        opponent.health -= damage
-        print(f"{self.name} uses Divine Wrath for {damage} damage!")
-
-    def celestial_shield(self):
-        self.health += 25
-        print(f"{self.name} uses Celestial Shield (+25 HP)")
-
-    def secret_ability(self, opponent):
-        if self.health > 50:
-            print("Judgment Day not unlocked yet!")
-            return
-        if self.secret_ability_used:
-            print("Judgment Day already used!")
-            return
-
-        damage = 150
-        opponent.health -= damage
-        self.secret_ability_used = True
-
-        print(f"{self.name} uses JUDGMENT DAY for {damage} damage!")
+    def regenerate(self):
+        amount = min(5, self.max_health - self.health)
+        self.health += amount
+        print(f"{self.name} regenerates {amount} health!")
 
 
-# ------------------ TESTS ------------------
+# Basic tests
 def test_game():
     warrior = Warrior("TestWarrior")
     enemy = EvilWizard("TestEnemy")
 
+    # Warrior damage should be between 20 and 30.
+    starting_health = enemy.health
     warrior.attack(enemy)
-    assert enemy.health == 175
+    damage = starting_health - enemy.health
+    assert 20 <= damage <= 30
 
-    warrior.special_ability(enemy)
-    assert enemy.health == 125
+    # Healing restores health without exceeding the maximum.
+    warrior.health = 100
+    warrior.heal()
+    assert warrior.health == 125
 
-    warrior.shield_block()
-    assert warrior.health == 150
+    warrior.health = 135
+    warrior.heal()
+    assert warrior.health == 140
 
-    warrior.health = 20
-    warrior.secret_ability(enemy)
-    assert enemy.health == 50   # FIXED EXPECTATION
+    # A shield blocks one attack, then wears off.
+    warrior.block_next_attack = True
+    enemy.attack(warrior)
+    assert warrior.health == 140
+    assert warrior.block_next_attack is False
 
+    # Wizard regeneration is capped at maximum health.
+    enemy.health = 140
+    enemy.regenerate()
+    assert enemy.health == 145
 
-# ------------------ SIMPLE GAME LOOP ------------------
-def battle(player, opponent):
-    print(f"\n{player.name} vs {opponent.name}\n")
+    enemy.health = 148
+    enemy.regenerate()
+    assert enemy.health == 150
 
-    while player.health > 0 and opponent.health > 0:
-        player.display_stats()
-        opponent.display_stats()
-
-        print("\n1 Attack | 2 Special | 3 Secret | 4 Heal")
-        action = input("> ")
-
-        if action == "1":
-            player.attack(opponent)
-        elif action == "2":
-            player.special_ability(opponent)
-        elif action == "3":
-            player.secret_ability(opponent)
-        elif action == "4":
-            if hasattr(player, "shield_block"):
-                player.shield_block()
-            elif hasattr(player, "ice_shield"):
-                player.ice_shield()
-            elif hasattr(player, "evade"):
-                player.evade()
-            elif hasattr(player, "divine_shield"):
-                player.divine_shield()
-            elif hasattr(player, "celestial_shield"):
-                player.celestial_shield()
-        else:
-            print("Invalid move")
-
-        if opponent.health > 0:
-            opponent.attack(player)
-
-    print("\nYou Win!" if player.health > 0 else "\nYou Lose!")
+    print("All tests passed!\n")
 
 
 def create_character():
-    name = input("Name: ")
+    print("Choose your character class:")
+    print("1. Warrior")
+    print("2. Mage")
+    print("3. Archer")
+    print("4. Paladin")
 
-    print("1 Warrior 2 Mage 3 Archer 4 Paladin 5 Chosen One")
-    choice = input("> ")
+    class_choice = input("Enter the number of your class choice: ")
+    name = input("Enter your character's name: ")
 
-    return {
-        "1": Warrior(name),
-        "2": Mage(name),
-        "3": Archer(name),
-        "4": Paladin(name),
-        "5": Chosen_one(name)
-    }.get(choice, Warrior(name))
+    if class_choice == "1":
+        return Warrior(name)
+    elif class_choice == "2":
+        return Mage(name)
+    elif class_choice == "3":
+        return Archer(name)
+    elif class_choice == "4":
+        return Paladin(name)
+    else:
+        print("Invalid choice. Defaulting to Warrior.")
+        return Warrior(name)
+
+
+def battle(player, wizard):
+    while wizard.health > 0 and player.health > 0:
+        print("\n--- Your Turn ---")
+        print("1. Attack")
+        print("2. Use Special Ability")
+        print("3. Heal")
+        print("4. View Stats")
+
+        choice = input("Choose an action: ")
+
+        if choice == "1":
+            player.attack(wizard)
+        elif choice == "2":
+            if not player.special_ability(wizard):
+                continue
+        elif choice == "3":
+            player.heal()
+        elif choice == "4":
+            player.display_stats()
+            wizard.display_stats()
+        else:
+            print("Invalid choice. Try again.")
+            continue
+
+        # The wizard regenerates and attacks if still alive.
+        if wizard.health > 0:
+            wizard.regenerate()
+            wizard.attack(player)
+
+    if wizard.health <= 0:
+        print(f"\nVictory! {player.name} defeated {wizard.name}!")
+    else:
+        print(f"\nDefeat! {player.name} has been defeated!")
 
 
 def main():
     print("MAGIA GLORY GAME")
     player = create_character()
-    enemy = EvilWizard("Kel'Thuzad")
-
-    battle(player, enemy)
+    wizard = EvilWizard("The Dark Wizard")
+    battle(player, wizard)
 
 
 if __name__ == "__main__":
